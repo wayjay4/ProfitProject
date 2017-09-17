@@ -5,10 +5,10 @@ require("product.php");
 class ProductModel
 {
   // local vars
-  public $sku_col;
-  public $price_col;
-  public $qty_col;
-  public $cost_col;
+  public $sku_col = array();
+  public $price_col = array();
+  public $qty_col = array();
+  public $cost_col = array();
   public $product_data = array();
   public $conv_rate;
   public $row_count;
@@ -29,7 +29,7 @@ class ProductModel
     $this->total_profitCAD = 0;
     $this->extractConversionRate($web_file = "http://quote.yahoo.com/d/quotes.csv?s=USDCAD=X&f=l1&e=.csv"); // canadian exchange rate
     $this->extractProductData($filename);
-    $this->calculateTotals();
+    $this->calculateTotalsAndAverages();
 
     // display html product data
     //$this->displayRAWProductData();
@@ -96,16 +96,17 @@ class ProductModel
     // set class column names
     foreach($header_arr as $column_id => $field_name) :
       if(trim($field_name) == "sku") :
-        $this->sku_col = $column_id;
-
+        //$this->sku_col = $column_id;
+        $this->sku_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
       elseif(trim($field_name) == "price") :
-        $this->price_col = $column_id;
-
+        //$this->price_col = $column_id;
+        $this->price_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
       elseif(trim($field_name) == "qty") :
-        $this->qty_col = $column_id;
-
+        //$this->qty_col = $column_id;
+        $this->qty_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
       elseif(trim($field_name) == "cost") :
-        $this->cost_col = $column_id;
+        //$this->cost_col = $column_id;
+        $this->cost_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
       endif;
     endforeach;
   }
@@ -113,8 +114,8 @@ class ProductModel
   protected function addProductData($product_arr)
   {
     // calculate revenue, cost, profit, and profit margin
-    $total_revenue = $product_arr[$this->price_col] * $product_arr[$this->qty_col];
-    $total_cost = $product_arr[$this->cost_col] * $product_arr[$this->qty_col];
+    $total_revenue = $product_arr[$this->price_col["colnum"]] * $product_arr[$this->qty_col["colnum"]];
+    $total_cost = $product_arr[$this->cost_col["colnum"]] * $product_arr[$this->qty_col["colnum"]];
     $profit_usd = $total_revenue - $total_cost;
     $p_margin = $profit_usd / $total_revenue;
 
@@ -124,17 +125,17 @@ class ProductModel
     // set class product data array and increment row count
     $this->product_data[++$this->row_count] =
       new Product(
-        $product_arr[$this->sku_col],
-        $product_arr[$this->price_col],
-        $product_arr[$this->qty_col],
-        $product_arr[$this->cost_col],
+        $product_arr[$this->sku_col["colnum"]],
+        $product_arr[$this->price_col["colnum"]],
+        $product_arr[$this->qty_col["colnum"]],
+        $product_arr[$this->cost_col["colnum"]],
         $p_margin,
         $profit_usd,
         $profit_cad
       );
   }
 
-  protected function calculateTotals()
+  protected function calculateTotalsAndAverages()
   {
     // calculate and set totals for price(avg), qty, profit margin(avg), proftiUSD, and profitCAD
     foreach($this->product_data as $key=>$product) :
@@ -186,10 +187,10 @@ class ProductModel
   {
     // display Product data
     echo("<h1>HEADER DATA:</h1>");
-    echo("<p>Sku Column ID: ".$this->sku_col."</p>");
-    echo("<p>Price Column ID: ".$this->price_col."</p>");
-    echo("<p>Quantity Column ID: ".$this->qty_col."</p>");
-    echo("<p>Cost Column ID: ".$this->cost_col."</p>");
+    echo("<p>Sku Column ID: ".$this->sku_col["colnum"]."</p>");
+    echo("<p>Price Column ID: ".$this->price_col["colnum"]."</p>");
+    echo("<p>Quantity Column ID: ".$this->qty_col["colnum"]."</p>");
+    echo("<p>Cost Column ID: ".$this->cost_col["colnum"]."</p>");
 
     echo("<h1>PRODUCT DATA:</h1>");
     foreach($this->product_data as $key=>$product) :
