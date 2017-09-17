@@ -11,13 +11,36 @@ class ProductModel
   public $cost_col;
   public $product_data = array();
   public $row_count;
+  public $conv_rate;
 
   public function __construct($filename)
   {
     //set class vars
     $this->row_count = 0;
     $this->extractProductData($filename);
+    $this->extractConversionRate($web_file = "http://quote.yahoo.com/d/quotes.csv?s=USDCAD=X&f=l1&e=.csv");
     $this->displayProductData();
+  }
+
+  public function extractConversionRate($webfile)
+  {
+    // local vars
+    $handle;
+    $conversion_data = array();
+
+    // if file exists, the  n open and read contents
+    if (($handle = fopen($webfile, "r")) !== FALSE) :
+      // read each line and save data until end of file is reached
+      while(!feof($handle)) :
+        // get data in file, then save it
+        $conversion_data = fgetcsv($handle));
+      endwhile;
+
+      fclose($handle);
+    endif;
+
+    // set class var
+    $this->conv_rate = $conversion_data[0];
   }
 
   protected function extractProductData($filename)
@@ -37,7 +60,7 @@ class ProductModel
         // if data in line is available, then save it and incrment row
         if($data_arr = fgetcsv($handle)) :
 
-          // if we are in the header row, then set column names
+          // if we are in the header row, then set class column names
           // else, set product data
           if($row == 0) :
             $this->setHeaderNames($data_arr);
@@ -101,6 +124,11 @@ class ProductModel
     echo("<p>PRODUCT DATA:</p>");
     echo '<pre>';
       print_r($this->product_data);
+    echo '</pre>';
+
+    echo("<p>CONVERSION RATE:</p>");
+    echo '<pre>';
+      print_r($this->conv_rate);
     echo '</pre>';
   }
 }

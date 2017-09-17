@@ -20,8 +20,7 @@
       // get includes
       require("product_model.php");
 
-      $filename = "products.csv";
-      $product_model = new ProductModel($filename);
+      $product_model = new ProductModel($filename = "products.csv");
 
       ?>
 
