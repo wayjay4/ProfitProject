@@ -3,28 +3,24 @@
 class Product
 {
   // local vars
-  private $sku;
-  private $price;
-  private $qty;
-  private $cost;
-  private $profit;
-  private $p_margin;
+  public $sku;
+  public $price;
+  public $qty;
+  public $cost;
+  public $p_margin;
+  public $profit_usd;
+  public $profit_cad;
 
-  public function __construct($sku, $price, $qty, $cost)
+  public function __construct($sku, $price, $qty, $cost, $p_margin, $profit_usd, $profit_cad)
   {
     // set local vars
     $this->sku = $sku;
     $this->price = $price;
     $this->qty = $qty;
     $this->cost = $cost;
-
-    // calculate revenue, profit, and profit margin
-    $total_revenue = $this->price * $this->qty;
-    $total_cost = $this->cost * $this->qty;
-    $this->profit = $total_revenue - $total_cost;
-    $this->p_margin = $this->profit / $total_revenue;
-
-    // convert profit from USD to CAD
+    $this->p_margin = $p_margin;
+    $this->profit_usd = $profit_usd;
+    $this->profit_cad = $profit_cad;
   }
 
   public function __getSku()
@@ -35,6 +31,7 @@ class Product
   public function __getPrice()
   {
     return $this->price;
+    //return money_format('$%i', $this->price);
   }
 
   public function __getQty()
@@ -45,16 +42,24 @@ class Product
   public function __getCost()
   {
     return $this->cost;
-  }
-
-  public function __getProfit()
-  {
-    return $this->profit;
+    //return money_format('$%i', $this->cost);
   }
 
   public function __getProfitMargin()
   {
     return $this->p_margin;
+  }
+
+  public function __getProfitUSD()
+  {
+    return $this->profit_usd;
+    //return money_format('$%i', $this->profit_usd);
+  }
+
+  public function __getProfitCAD()
+  {
+    return $this->profit_cad;
+    //return money_format('$%i', $this->profit_cad);
   }
 }
 ?>
