@@ -17,8 +17,11 @@
     <div class="container">
 
       <?php
+      // get includes
+      require("product_model.php");
 
-      echo("Hello World!");
+      $filename = "products.csv";
+      $product_model = new ProductModel($filename);
 
       ?>
 
