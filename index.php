@@ -9,7 +9,7 @@
     <title>My Profit Project</title>
 
     <!-- Custom styles for this template -->
-    <link href="/css/app.css" rel="stylesheet">
+    <link href="css/app.css" rel="stylesheet">
     <link
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
       rel="stylesheet"
