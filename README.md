@@ -1,6 +1,8 @@
 # ProfitProject
 PHP Exercise – File Processor
 
+Working code sample authored by Waylon Dixon can be found at: http://profitproject.cf/.
+
 Description:
 We are going to build a file processor to calculate totals and profit margins. You will be provided a sample file with 4-X columns (sku, cost, price, qty are guaranteed).  We expect an html table outputting the formatted file contents, the profit per product, and the expected profit per product.  The last row of the table should be a summary of information of average cost, average price, total qty, average profit margin, and total profit.
 
@@ -36,9 +38,9 @@ Table
 
 • Header: SKU, Cost, Price, QTY, Profit Margin, Total Profit (USD), Total Profit (CAD)
 
-• Body: 
+• Body:
     -QTY, profit margin, and total profit have the possibility to be negative.  If these values are negative output the values as red.  If positive, green.
-    
+
 • Footer: Average Price, total qty, average profit margin, total profit (USD), total profit (CAD).
 
 Format all dollar values (e.g. $4.55).

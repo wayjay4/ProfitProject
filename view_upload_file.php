@@ -15,7 +15,7 @@
     // validate if file is of type: '.csv'
     // if valid, then set upload path var and display success message
     // else, delete invalid file from tmp_dir and display error message
-    if($_FILES['uploaded_file']['type'] == "text/csv") :
+    if(pathinfo($_FILES['uploaded_file']['name'], PATHINFO_EXTENSION) == "csv") :
       echo("<div class='alert alert-success' role='alert'>SUCCESS: The file ".  basename($_FILES['uploaded_file']['name'])." has been successfully uploaded.</div>");
       echo("<div class='alert alert-primary' role='alert'>When ready you can select a new file to upload.</div>");
       $upload_path = $_FILES['uploaded_file']['tmp_name'];
