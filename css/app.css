@@ -28,3 +28,8 @@ h1 {
   span.num_pos {
      color:green;
    }
+
+   tr.footer td {
+     font-weight: bold;
+     background-color: yellow;
+   }

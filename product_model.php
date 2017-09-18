@@ -5,11 +5,12 @@ require("product.php");
 class ProductModel
 {
   // local vars
-  public $sku_col = array();
-  public $price_col = array();
-  public $qty_col = array();
-  public $cost_col = array();
-  public $product_data = array();
+  public $filename;
+  public $sku_col;
+  public $price_col;
+  public $qty_col;
+  public $cost_col;
+  public $product_data;
   public $conv_rate;
   public $row_count;
   public $average_price;
@@ -17,44 +18,52 @@ class ProductModel
   public $average_profit_margin;
   public $total_profitUSD;
   public $total_profitCAD;
+  public $error_mssg;
 
   public function __construct($filename)
   {
     //set class vars
+    $this->filename = $filename;
     $this->row_count = 0;
     $this->average_price = 0;
     $this->total_qty = 0;
     $this->average_profit_margin = 0;
     $this->total_profitUSD = 0;
     $this->total_profitCAD = 0;
-    $this->extractConversionRate($web_file = "http://quote.yahoo.com/d/quotes.csv?s=USDCAD=X&f=l1&e=.csv"); // canadian exchange rate
-    $this->extractProductData($filename);
-    $this->calculateTotalsAndAverages();
+    $this->conv_rate = $this->getCADConversionRate($web_file = "http://quote.yahoo.com/d/quotes.csv?s=USDCAD=X&f=l1&e=.csv"); // canadian exchange rate
+    $this->error_mssg = "";
 
-    // display html product data
-    //$this->displayRAWProductData();
-    $this->displayHTMLProductData();
+    // if extract data from file is a success, then complete calculations and display the HTML table
+    // else, display an error message
+    if($this->extractProductData($filename)) :
+      // complete calculations
+      $this->calculateTotalsAndAverages();
+      // display HTML table
+      $this->displayHTMLProductData();
+    else :
+      echo($this->error_mssg);
+    endif;
   }
 
-  protected function extractConversionRate($webfile)
+  public function getCADConversionRate($webfile)
   {
     // local vars
     $handle;
-    $conversion_data = array();
+    $conversion_rate = array();
 
-    // if file exists, the  n open and read contents
+    // if file exists, then open and read contents
     if (($handle = fopen($webfile, "r")) !== FALSE) :
       // read each line and save data until end of file is reached
       while(!feof($handle)) :
         // get data in file, then save it
-        $conversion_data = fgetcsv($handle);
+        $conversion_rate = fgetcsv($handle);
       endwhile;
 
       fclose($handle);
     endif;
 
-    // set class var
-    $this->conv_rate = $conversion_data[0];
+    // return conversion rate
+    return $conversion_rate[0];
   }
 
   protected function extractProductData($filename)
@@ -63,8 +72,10 @@ class ProductModel
     $handle;
     $row;
     $data_arr = array();
+    $result;
 
-    // if file exists, the  n open and read contents
+    // if file exists, then read contents and save product data
+    // else, display error message and exit
     if (($handle = fopen($filename, "r")) !== FALSE) :
       // set row counter
       $row = 0;
@@ -74,12 +85,45 @@ class ProductModel
         // if data in line is available, then save it and incrment row
         if($data_arr = fgetcsv($handle)) :
 
-          // if we are in the header row, then set class column names
-          // else, set product data
+          // if we are in the header row, then set class column names/numbers
+          // else, add row to product data array
           if($row == 0) :
-            $this->setHeaderNames($data_arr);
+            // if set header names is successful, then set result to true
+            // else, set error message and return false
+            if($this->setHeaderNames($data_arr)) :
+              // set result
+              $result = true;
+            else :
+              $result = false;
+              $this->error_mssg .= "
+                <h1>ERROR ALERT:</h1>
+                <p>
+                  The file '$this->filename' must contain the following headers: 'sku', 'price', 'qty', and 'cost'.
+                  Please check your file and try again.
+                </p>";
+
+              // return result
+              return $result;
+            endif;
           elseif($row > 0) :
-            $this->addProductData($data_arr);
+            // if add product data was successful, then se result to true 
+            // else, set error message and return false
+            if($this->addProductData($data_arr)) :
+              // set result
+              $result = true;
+            else :
+              $result = false;
+              $this->error_mssg .= "
+                <h1>ERROR ALERT:</h1>
+                <p>
+                  The following columns: price', 'qty', and 'cost' must be numeric values.
+                  A non-numeric value was found in row '$row' in one of the listed columns in the file '$this->filename'.
+                  Please check your file and try again.
+                </p>";
+
+              // return result
+              return $result;
+            endif;
           endif;
 
           // increment row counter
@@ -88,47 +132,91 @@ class ProductModel
       endwhile;
 
       fclose($handle);
+
+      // set result to true
+      $result = true;
+    else :
+      // set result to false and set error message
+      $result = false;
+      $this->error_mssg .= "
+        <h1>ERROR ALERT:</h1>
+        <p>Could not open file '$this->filename'. Please verify the file exists and try again.</p>";
     endif;
+
+    // return result
+    return $result;
   }
 
   protected function setHeaderNames($header_arr)
   {
+    // local vars
+    $result;
+
     // set class column names and numbers
     foreach($header_arr as $column_id => $field_name) :
-      if(trim($field_name) == "sku") :
-        $this->sku_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
-      elseif(trim($field_name) == "price") :
-        $this->price_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
-      elseif(trim($field_name) == "qty") :
-        $this->qty_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
-      elseif(trim($field_name) == "cost") :
-        $this->cost_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
+      if(strtolower(trim($field_name)) === "sku") :
+        $this->sku_col = array("fieldname"=>strtolower(trim($field_name)), "colnum"=>$column_id);
+      elseif(strtolower(trim($field_name)) === "price") :
+        $this->price_col = array("fieldname"=>strtolower(trim($field_name)), "colnum"=>$column_id);
+      elseif(strtolower(trim($field_name)) === "qty") :
+        $this->qty_col = array("fieldname"=>strtolower(trim($field_name)), "colnum"=>$column_id);
+      elseif(strtolower(trim($field_name)) === "cost") :
+        $this->cost_col = array("fieldname"=>strtolower(trim($field_name)), "colnum"=>$column_id);
       endif;
     endforeach;
+
+    // verify if all headers have been set, then set result to true
+    // else, set result to false and set error message
+    if(isset($this->sku_col) && isset($this->price_col) && isset($this->qty_col) && isset($this->cost_col)) :
+      $result = true;
+    else :
+      $result = false;
+    endif;
+
+    // return result
+    return $result;
   }
 
   protected function addProductData($product_arr)
   {
-    // calculate revenue, cost, profit, and profit margin
-    $total_revenue = $product_arr[$this->price_col["colnum"]] * $product_arr[$this->qty_col["colnum"]];
-    $total_cost = $product_arr[$this->cost_col["colnum"]] * $product_arr[$this->qty_col["colnum"]];
-    $profit_usd = $total_revenue - $total_cost;
-    $p_margin = $profit_usd / $total_revenue;
+    // local vars
+    $result;
 
-    // convert profit from USD to CAD
-    $profit_cad = $profit_usd * $this->conv_rate;
+    // verify that the following have numeric values: price, qty, and cost
+    // if they are, then set result to true and complete calculations
+    // else, set and return result to false
+    if(is_numeric($product_arr[$this->price_col["colnum"]]) &&
+       is_numeric($product_arr[$this->qty_col["colnum"]]) &&
+       is_numeric($product_arr[$this->cost_col["colnum"]])) :
+      // set result
+      $result = true;
 
-    // set class product data array and increment row count
-    $this->product_data[++$this->row_count] =
-      new Product(
-        $product_arr[$this->sku_col["colnum"]],
-        $product_arr[$this->price_col["colnum"]],
-        $product_arr[$this->qty_col["colnum"]],
-        $product_arr[$this->cost_col["colnum"]],
-        $p_margin,
-        $profit_usd,
-        $profit_cad
-      );
+      // calculate revenue, cost, profit, and profit margin
+      $total_revenue = $product_arr[$this->price_col["colnum"]] * $product_arr[$this->qty_col["colnum"]];
+      $total_cost = $product_arr[$this->cost_col["colnum"]] * $product_arr[$this->qty_col["colnum"]];
+      $profit_usd = $total_revenue - $total_cost;
+      $p_margin = $profit_usd / $total_revenue;
+
+      // convert profit from USD to CAD and save
+      $profit_cad = $profit_usd * $this->conv_rate;
+
+      // set class product data array and increment row count
+      $this->product_data[++$this->row_count] =
+        new Product(
+          $product_arr[$this->sku_col["colnum"]],
+          $product_arr[$this->price_col["colnum"]],
+          $product_arr[$this->qty_col["colnum"]],
+          $product_arr[$this->cost_col["colnum"]],
+          $p_margin,
+          $profit_usd,
+          $profit_cad
+        );
+    else :
+      $result = false;
+    endif;
+
+    // return result
+    return $result;
   }
 
   protected function calculateTotalsAndAverages()
@@ -142,14 +230,17 @@ class ProductModel
       $this->total_profitCAD += $product->__getProfitCAD();
     endforeach;
 
-    // calculate and set averages for price and profit margin
-    $this->average_price /= $this->row_count;
-    $this->average_profit_margin /= $this->row_count;
+    // if there is at least one row, then calculate and set averages for price and profit margin
+    // (note: prevents divsion by zero)
+    if($this->row_count >= 1) :
+      $this->average_price /= $this->row_count;
+      $this->average_profit_margin /= $this->row_count;
+    endif;
   }
 
   public function displayRAWProductData()
   {
-    // display Product data
+    // display raw Product data
     echo("<p>HEADER DATA:</p>");
     echo("<p>Sku Column ID: ".$this->sku_col."</p>");
     echo("<p>Price Column ID: ".$this->price_col."</p>");
@@ -171,7 +262,6 @@ class ProductModel
       print_r($this->product_data);
     echo '</pre>';
 
-    // display results
     echo("<p>Average Price: ".$this->average_price."</p>");
     echo("<p>Total Qty: ".$this->total_qty."</p>");
     echo("<p>Average P.Margin: ".$this->average_profit_margin."</p>");
@@ -181,6 +271,7 @@ class ProductModel
 
   public function displayHTMLProductData()
   {
+    // display HTML table of product figures
     require_once("view_product_table.php");
   }
 }

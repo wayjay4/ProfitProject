@@ -20,7 +20,6 @@
   <body>
 
     <div class="container">
-
       <?php
       // get includes
       require("product_model.php");
@@ -28,7 +27,7 @@
       $product_model = new ProductModel($filename = "products.csv");
 
       ?>
-
+      
     </div><!-- /.container -->
 
     <script src="/js/app.js"></script>
