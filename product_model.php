@@ -41,7 +41,7 @@ class ProductModel
       // display HTML table
       $this->displayHTMLProductData();
     else :
-      echo($this->error_mssg);
+      require("view_error_message.php");
     endif;
   }
 
@@ -96,17 +96,17 @@ class ProductModel
             else :
               $result = false;
               $this->error_mssg .= "
-                <h1>ERROR ALERT:</h1>
-                <p>
-                  The file '$this->filename' must contain the following headers: 'sku', 'price', 'qty', and 'cost'.
-                  Please check your file and try again.
-                </p>";
+                  <h3>ERROR ALERT:</h3>
+                  <p>
+                    The file must contain the following headers: 'sku', 'price', 'qty', and 'cost'.
+                    Please check your file and try again.
+                  </p>";
 
               // return result
               return $result;
             endif;
           elseif($row > 0) :
-            // if add product data was successful, then se result to true 
+            // if add product data was successful, then se result to true
             // else, set error message and return false
             if($this->addProductData($data_arr)) :
               // set result
@@ -114,12 +114,12 @@ class ProductModel
             else :
               $result = false;
               $this->error_mssg .= "
-                <h1>ERROR ALERT:</h1>
-                <p>
-                  The following columns: price', 'qty', and 'cost' must be numeric values.
-                  A non-numeric value was found in row '$row' in one of the listed columns in the file '$this->filename'.
-                  Please check your file and try again.
-                </p>";
+                  <h3>ERROR ALERT:</h3>
+                  <p>
+                    The following columns: price', 'qty', and 'cost' must be numeric values.
+                    A non-numeric value was found in row '$row' in one of the listed columns in the file.
+                    Please check your file and try again.
+                  </p>";
 
               // return result
               return $result;
@@ -139,8 +139,8 @@ class ProductModel
       // set result to false and set error message
       $result = false;
       $this->error_mssg .= "
-        <h1>ERROR ALERT:</h1>
-        <p>Could not open file '$this->filename'. Please verify the file exists and try again.</p>";
+          <h3>ERROR ALERT:</h3>
+          <p>Could not open file '$this->filename'. Please verify the file exists and try again.</p>";
     endif;
 
     // return result
@@ -221,18 +221,18 @@ class ProductModel
 
   protected function calculateTotalsAndAverages()
   {
-    // calculate and set totals for price(avg), qty, profit margin(avg), proftiUSD, and profitCAD
-    foreach($this->product_data as $key=>$product) :
-      $this->average_price += $product->__getPrice();
-      $this->total_qty += $product->__getQty();
-      $this->average_profit_margin += $product->__getProfitMargin();
-      $this->total_profitUSD += $product->__getProfitUSD();
-      $this->total_profitCAD += $product->__getProfitCAD();
-    endforeach;
-
-    // if there is at least one row, then calculate and set averages for price and profit margin
-    // (note: prevents divsion by zero)
+    // if there is at least one row, then perform calculations
     if($this->row_count >= 1) :
+      // calculate and set totals for price(avg), qty, profit margin(avg), proftiUSD, and profitCAD
+      foreach($this->product_data as $key=>$product) :
+        $this->average_price += $product->__getPrice();
+        $this->total_qty += $product->__getQty();
+        $this->average_profit_margin += $product->__getProfitMargin();
+        $this->total_profitUSD += $product->__getProfitUSD();
+        $this->total_profitCAD += $product->__getProfitCAD();
+      endforeach;
+
+      // calculate and set averages for price and profit margin
       $this->average_price /= $this->row_count;
       $this->average_profit_margin /= $this->row_count;
     endif;

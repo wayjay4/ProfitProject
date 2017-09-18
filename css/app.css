@@ -4,7 +4,7 @@
 
 /* Move down content because we have a fixed navbar that is 3.5rem tall */
 body {
-  padding-top: 3.5rem;
+  padding-top: 2px;
 }
 
 /*
@@ -18,18 +18,60 @@ h1 {
 }
 
 /*
- * mods
+ * Sidebar
  */
 
-  span.num_neg {
-    color:red;
-  }
+.sidebar {
+  position: fixed;
+  top: 51px;
+  bottom: 0;
+  left: 0;
+  z-index: 1050;
+  padding: 20px;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  border-right: 1px solid #eee;
+}
 
-  span.num_pos {
-     color:green;
-   }
+/* Sidebar navigation */
+.sidebar {
+  padding-left: 0;
+  padding-right: 0;
+}
 
-   tr.footer td {
-     font-weight: bold;
-     background-color: yellow;
-   }
+.sidebar .nav {
+  margin-bottom: 20px;
+}
+
+.sidebar .nav-item {
+  width: 100%;
+}
+
+.sidebar .nav-item + .nav-item {
+  margin-left: 0;
+}
+
+.sidebar .nav-link {
+  border-radius: 0;
+}
+
+/*
+ * other mods
+ */
+
+span.num_neg {
+  color:red;
+}
+
+span.num_pos {
+   color:green;
+}
+
+tr.footer td {
+ font-weight: bold;
+ background-color: yellow;
+}
+
+form {
+  margin-bottom: 15px;
+}
