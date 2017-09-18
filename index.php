@@ -22,15 +22,10 @@
     <div class="container-fluid">
       <div class="row">
       <?php
-      // display HTML view for uploading files
-      require("view_upload_file.php");
-
-      // if upload path is set use it, else use the default csv file
-      isset($upload_path) ? $filename = $upload_path : $filename = "products_example.csv";
 
       // initalize ProductModel to display HTML product table
       require("product_model.php");
-      $product_model = new ProductModel($filename);
+      $product_model = new ProductModel();
 
       ?>
       </div>

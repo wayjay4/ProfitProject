@@ -19,11 +19,11 @@ class ProductModel
   public $total_profitUSD;
   public $total_profitCAD;
   public $error_mssg;
+  public $upload_mssg;
 
-  public function __construct($filename)
+  public function __construct()
   {
     //set class vars
-    $this->filename = $filename;
     $this->row_count = 0;
     $this->average_price = 0;
     $this->total_qty = 0;
@@ -32,10 +32,29 @@ class ProductModel
     $this->total_profitCAD = 0;
     $this->conv_rate = $this->getCADConversionRate($web_file = "http://quote.yahoo.com/d/quotes.csv?s=USDCAD=X&f=l1&e=.csv"); // canadian exchange rate
     $this->error_mssg = "";
+    $this->upload_mssg = "";
+    $this->filename = "";
+
+    // set file name
+    // if a file was uploaded, then get and set file name to uploaded file
+    // else use default local file and add default message to upload mssg
+    if(!empty($_FILES['uploaded_file'])) :
+      $this->filename = $this->getCSVUpload();
+    endif;
+
+    // if filename name did not get set, then use the default local file
+    // and add default message to upload mssg
+    if($this->filename == "") :
+      $this->filename = "products_example.csv";
+      $this->upload_mssg .= "<div class='alert alert-primary' role='alert'>NOTICE: Sample file 'products_example.csv' is currently displayed. <br />Please select a new file to upload.</div>";
+    endif;
+
+    // display HTML for uploading files
+    $this->displayHTMLUploadForm();
 
     // if extract data from file is a success, then complete calculations and display the HTML table
     // else, display an error message
-    if($this->extractProductData($filename)) :
+    if($this->extractProductData($this->filename)) :
       // complete calculations
       $this->calculateTotalsAndAverages();
       // display HTML table
@@ -43,6 +62,35 @@ class ProductModel
     else :
       require("view_error_message.php");
     endif;
+  }
+
+  public function getCSVUpload()
+  {
+    // local vars
+    $upload_path;
+
+    // initialize upload path to empty string
+    $upload_path = "";
+
+    // validate if file is of type: '.csv'
+    // if valid, then set upload path var, add 'success' to upload message, and set result to true
+    // else, delete invalid file from tmp_dir and add 'error' to upload message
+    if(pathinfo($_FILES['uploaded_file']['name'], PATHINFO_EXTENSION) == "csv") :
+      // set filename
+      $upload_path = $_FILES['uploaded_file']['tmp_name'];
+      // add success message to upload mssg
+      $this->upload_mssg .= "<div class='alert alert-success' role='alert'>SUCCESS: The file ".basename($_FILES['uploaded_file']['name'])." has been successfully uploaded.</div>"
+                           ."<div class='alert alert-primary' role='alert'>When ready you can select a new file to upload.</div>";
+    else :
+      // delete invalid file from temp dir
+      unlink($_FILES['uploaded_file']['tmp_name']);
+      // add error message to upload mssg
+      $this->upload_mssg .= "<div class='alert alert-danger' role='alert'>ERROR: File upload is invalid, please make sure file is of type '.csv'. Please try again.</div>"
+                           ."<div class='alert alert-warning' role='alert'>NOTICE: Sample file 'products_example.csv' is being displayed instead.</div>";
+    endif;
+
+    // return result
+    return $upload_path;
   }
 
   public function getCADConversionRate($webfile)
@@ -267,6 +315,12 @@ class ProductModel
     echo("<p>Average P.Margin: ".$this->average_profit_margin."</p>");
     echo("<p>Total Profit USD: ".$this->total_profitUSD."</p>");
     echo("<p>Total Profit CAD: ".$this->total_profitCAD."</p>");
+  }
+
+  public function displayHTMLUploadForm()
+  {
+      // display HTML for uploading files
+      require("view_upload_file.php");
   }
 
   public function displayHTMLProductData()
