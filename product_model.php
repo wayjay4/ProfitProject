@@ -64,7 +64,28 @@ class ProductModel
     endif;
   }
 
-  public function getCSVUpload()
+  public function getCADConversionRate($webfile)
+  {
+    // local vars
+    $handle;
+    $conversion_rate = array();
+
+    // if file exists, then open and read contents
+    if (($handle = fopen($webfile, "r")) !== FALSE) :
+      // read each line and save data until end of file is reached
+      while(!feof($handle)) :
+        // get data in file, then save it
+        $conversion_rate = fgetcsv($handle);
+      endwhile;
+
+      fclose($handle);
+    endif;
+
+    // return conversion rate
+    return $conversion_rate[0];
+  }
+
+  protected function getCSVUpload()
   {
     // local vars
     $upload_path;
@@ -91,27 +112,6 @@ class ProductModel
 
     // return result
     return $upload_path;
-  }
-
-  public function getCADConversionRate($webfile)
-  {
-    // local vars
-    $handle;
-    $conversion_rate = array();
-
-    // if file exists, then open and read contents
-    if (($handle = fopen($webfile, "r")) !== FALSE) :
-      // read each line and save data until end of file is reached
-      while(!feof($handle)) :
-        // get data in file, then save it
-        $conversion_rate = fgetcsv($handle);
-      endwhile;
-
-      fclose($handle);
-    endif;
-
-    // return conversion rate
-    return $conversion_rate[0];
   }
 
   protected function extractProductData($filename)
@@ -319,8 +319,8 @@ class ProductModel
 
   public function displayHTMLUploadForm()
   {
-      // display HTML for uploading files
-      require("view_upload_file.php");
+    // display HTML for uploading files
+    require("view_upload_file.php");
   }
 
   public function displayHTMLProductData()
