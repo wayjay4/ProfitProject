@@ -31,7 +31,6 @@ class Product
   public function __getPrice()
   {
     return $this->price;
-    //return money_format('$%i', $this->price);
   }
 
   public function __getQty()
@@ -42,7 +41,6 @@ class Product
   public function __getCost()
   {
     return $this->cost;
-    //return money_format('$%i', $this->cost);
   }
 
   public function __getProfitMargin()
@@ -53,13 +51,11 @@ class Product
   public function __getProfitUSD()
   {
     return $this->profit_usd;
-    //return money_format('$%i', $this->profit_usd);
   }
 
   public function __getProfitCAD()
   {
     return $this->profit_cad;
-    //return money_format('$%i', $this->profit_cad);
   }
 }
 ?>

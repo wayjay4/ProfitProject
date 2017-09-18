@@ -93,19 +93,15 @@ class ProductModel
 
   protected function setHeaderNames($header_arr)
   {
-    // set class column names
+    // set class column names and numbers
     foreach($header_arr as $column_id => $field_name) :
       if(trim($field_name) == "sku") :
-        //$this->sku_col = $column_id;
         $this->sku_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
       elseif(trim($field_name) == "price") :
-        //$this->price_col = $column_id;
         $this->price_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
       elseif(trim($field_name) == "qty") :
-        //$this->qty_col = $column_id;
         $this->qty_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
       elseif(trim($field_name) == "cost") :
-        //$this->cost_col = $column_id;
         $this->cost_col = array("fieldname"=>trim($field_name), "colnum"=>$column_id);
       endif;
     endforeach;
@@ -185,32 +181,7 @@ class ProductModel
 
   public function displayHTMLProductData()
   {
-    // display Product data
-    echo("<h1>HEADER DATA:</h1>");
-    echo("<p>Sku Column ID: ".$this->sku_col["colnum"]."</p>");
-    echo("<p>Price Column ID: ".$this->price_col["colnum"]."</p>");
-    echo("<p>Quantity Column ID: ".$this->qty_col["colnum"]."</p>");
-    echo("<p>Cost Column ID: ".$this->cost_col["colnum"]."</p>");
-
-    echo("<h1>PRODUCT DATA:</h1>");
-    foreach($this->product_data as $key=>$product) :
-      // do stuff
-      echo("<p>SKU: ".$product->__getSku()."</p>");
-      echo("<p>Cost: ".$product->__getCost()."</p>");
-      echo("<p>Price: ".$product->__getPrice()."</p>");
-      echo("<p>QTY: ".$product->__getQty()."</p>");
-      echo("<p>Profit Margin: ".$product->__getProfitMargin()."</p>");
-      echo("<p>Total Profit (USD): ".$product->__getProfitUSD()."</p>");
-      echo("<p>Total Profit (CAD): ".$product->__getProfitCAD()."</p>");
-    endforeach;
-
-    // display results
-    echo("<h1>PRODUCT TOTALS AND AVERAGES:</h1>");
-    echo("<p>Average Price: ".$this->average_price."</p>");
-    echo("<p>Total Qty: ".$this->total_qty."</p>");
-    echo("<p>Average P.Margin: ".$this->average_profit_margin."</p>");
-    echo("<p>Total Profit USD: ".$this->total_profitUSD."</p>");
-    echo("<p>Total Profit CAD: ".$this->total_profitCAD."</p>");
+    require_once("view_product_table.php");
   }
 }
 ?>
