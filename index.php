@@ -24,8 +24,8 @@
       <?php
 
       // initalize ProductModel to display HTML product table
-      require("product_model.php");
-      $product_model = new ProductModel();
+      require("product_controller.php");
+      $product_model = new ProductController();
 
       ?>
       </div>

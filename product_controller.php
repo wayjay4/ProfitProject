@@ -2,7 +2,7 @@
 
 require("product.php");
 
-class ProductModel
+class ProductController
 {
   // local vars
   public $filename;
